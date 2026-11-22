@@ -1,0 +1,87 @@
+
+=== PART 1: fork + exec + wait ===
+
+$ gcc --version | head -1
+gcc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+
+$ gcc -Wall -Wextra -o run run.c && ./run
+parent: my PID is 5846
+child:  my PID is 5853, my parent is 5846
+total 56
+-rw-rw-r-- 1 dana dana   208 Nov 22 15:20 outputs.txt
+-rw-rw-r-- 1 dana dana  1013 Nov 22 15:20 pipeline.c
+-rw-rw-r-- 1 dana dana  1294 Nov 22 15:20 pipeline3.c
+-rw-rw-r-- 1 dana dana  1019 Nov 22 15:20 pipeline_broken.c
+-rw-rw-r-- 1 dana dana   703 Nov 22 15:20 redirect.c
+-rwxrwxr-x 1 dana dana 16392 Nov 22 15:20 run
+-rw-rw-r-- 1 dana dana   911 Nov 22 15:20 run.c
+-rw-rw-r-- 1 dana dana   909 Nov 22 15:20 run_date.c
+-rw-rw-r-- 1 dana dana   921 Nov 22 15:20 run_nosuch.c
+-rw-rw-r-- 1 dana dana   926 Nov 22 15:20 zombie.c
+parent: child 5853 ended with status 0
+
+$ gcc -Wall -Wextra -o run_date run_date.c && ./run_date
+parent: my PID is 5856
+child:  my PID is 5863, my parent is 5856
+Sun Nov 22 03:20:22 PM UTC 2026
+parent: child 5863 ended with status 0
+
+$ gcc -Wall -Wextra -o run_nosuch run_nosuch.c && ./run_nosuch
+parent: my PID is 5866
+child:  my PID is 5877, my parent is 5866
+exec: No such file or directory
+parent: child 5877 ended with status 127
+
+=== PART 2: a zombie, on purpose ===
+
+$ grep -n -B1 -A1 'sleep(20)' zombie.c
+23-    int status;
+24:    sleep(20);
+25-    waitpid(pid, &status, 0);                    /* step 3: wait for the child */
+
+$ gcc -Wall -Wextra -o zombie zombie.c; ./zombie > /dev/null & ZP=$!; sleep 2; ps -o pid,ppid,stat,cmd --ppid $$,$ZP; sleep 21; echo '--- 21 seconds later ---'; ps -o pid,ppid,stat,cmd --ppid $$,$ZP
+    PID    PPID STAT CMD
+   5904    5896 S+   ./zombie
+   5906    5904 Z+   [ls] <defunct>
+   5910    5896 R+   ps -o pid,ppid,stat,cmd --ppid 5896,5904
+--- 21 seconds later ---
+    PID    PPID STAT CMD
+
+=== PART 3: redirection ===
+
+$ gcc -Wall -Wextra -o redirect redirect.c && ./redirect
+open gave descriptor 1
+done: the listing is in out.txt
+
+$ head -3 out.txt
+total 132
+-rw-r--r-- 1 dana dana     0 Nov 22 15:20 out.txt
+-rw-rw-r-- 1 dana dana  1892 Nov 22 15:20 outputs.txt
+
+=== PART 4: a pipe ===
+
+$ gcc -Wall -Wextra -o pipeline pipeline.c && ./pipeline
+236
+
+$ ls /etc | wc -l
+236
+
+$ grep -n 'close(p\[1\])' pipeline_broken.c
+16:        close(p[1]);
+26:        close(p[1]);
+33:    /* close(p[1]); */
+
+$ gcc -Wall -Wextra -o pipeline_broken pipeline_broken.c; ./pipeline_broken & PB=$!; sleep 3; echo '--- 3 seconds later: the program is still running ---'; ps -o pid,ppid,stat,cmd --ppid $PB; echo '--- stopping it ---'; pkill -P $PB; wait $PB 2>/dev/null; echo 'stopped'
+--- 3 seconds later: the program is still running ---
+    PID    PPID STAT CMD
+   5966    5963 S+   wc -l
+--- stopping it ---
+stopped
+
+=== OPTIONAL: three stages ===
+
+$ gcc -Wall -Wextra -o pipeline3 pipeline3.c && ./pipeline3
+224
+
+$ ls /usr/bin | grep x | wc -l
+224
