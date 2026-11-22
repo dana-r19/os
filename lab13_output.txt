@@ -1,0 +1,226 @@
+
+=== PATCH: part 1 of the sheet ===
+  [edited]       kernel/syscall.h: SYS_sem_*
+  [edited]       user/user.h: sem_* declarations
+  [edited]       user/usys.pl: sem_* stubs
+  [edited]       Makefile: $U/_semtest, $U/_mix
+
+=== CHECK 1: the calls reach the kernel, which does not know them yet ===
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 1 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+init: starting sh
+$ semtest
+3 semtest: unknown sys call 24
+4 semtest: unknown sys call 25
+child: I ran after the parent
+parent: done, I let the child go
+3 semtest: unknown sys call 26
+3 semtest: unknown sys call 24
+3 semtest: unknown sys call 24
+3 semtest: unknown sys call 25
+ping 1
+3 semtest: unknown sys call 26
+3 semtest: unknown sys call 25
+ping 2
+3 semtest: unknown sys call 26
+3 semtest: unknown sys call 25
+ping 3
+3 semtest: unknown sys call 26
+5 semtest: unknown sys call 25
+  pong 1
+5 semtest: unknown sys call 26
+5 semtest: unknown sys call 25
+  pong 2
+5 semtest: unknown sys call 26
+5 semtest: unknown sys call 25
+  pong 3
+5 semtest: unknown sys call 26
+semtest: OK
+$ QEMU: Terminated
+
+=== PATCH: part 2 of the sheet ===
+  [edited]       Makefile: $K/sem.o
+  [edited]       kernel/syscall.c: extern sys_sem_*
+  [edited]       kernel/syscall.c: table entries
+  [edited]       kernel/syscall.c: names for trace (only if trace is there)
+
+=== CHECK 2: semtest (1 CPU, then 3 CPUs) ===
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 1 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+init: starting sh
+$ semtest
+parent: done, I let the child go
+child: I ran after the parent
+ping 1
+  pong 1
+ping 2
+  pong 2
+ping 3
+  pong 3
+semtest: OK
+$ QEMU: Terminated
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 3 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+hart 1 starting
+hart 2 starting
+init: starting sh
+$ semtest
+parent: done, I let the child go
+child: I ran after the parent
+ping 1
+  pong 1
+ping 2
+  pong 2
+ping 3
+  pong 3
+semQEMU: Terminated
+
+=== PART 3: mix without and with the lock (3 CPUs) ===
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 3 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+hart 1 starting
+hart 2 starting
+init: starting sh
+$ mix
+AbAAAAAAbbbbAbbAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAbAAAAAAAAAAAAAAAAAAbAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+bbbbbbbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbbbbbbbbbmix
+bbbbbbb
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbmix lockb
+b
+bbbbbmix lock
+bbbbbbbbbbbbbbbbbbbbbbbbb
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+$ AAAAAAAqemu-system-riscv64: terminating on signal 15 from pid 9694 (timeout)
+
+=== THE CHANGES ===
+
+$ git diff -U1 -- kernel/syscall.c kernel/syscall.h user/user.h user/usys.pl Makefile
+diff --git a/Makefile b/Makefile
+index a26f3db..e8c3eea 100644
+--- a/Makefile
++++ b/Makefile
+@@ -20,2 +20,3 @@ OBJS = \
+   $K/sysproc.o \
++  $K/sem.o \
+   $K/bio.o \
+@@ -135,2 +136,6 @@ UPROGS=\
+ 	$U/_echo\
++	$U/_sleep\
++	$U/_args\
++	$U/_find\
++	$U/_mystat\
+ 	$U/_forktest\
+@@ -149,2 +154,8 @@ UPROGS=\
+ 	$U/_zombie\
++	$U/_semtest\
++	$U/_mix\
++	$U/_trace\
++	$U/_run\
++	$U/_pingpong\
++	$U/_primes\
+ 	$U/_logstress\
+diff --git a/kernel/syscall.c b/kernel/syscall.c
+index 1800f20..86a2ab1 100644
+--- a/kernel/syscall.c
++++ b/kernel/syscall.c
+@@ -105,2 +105,6 @@ extern uint64 sys_close(void);
+ extern uint64 sys_sync(void);
++extern uint64 sys_sem_init(void);           // new
++extern uint64 sys_sem_down(void);           // new
++extern uint64 sys_sem_up(void);             // new
++extern uint64 sys_trace(void);              // new
+ 
+@@ -132,2 +136,6 @@ static uint64 (*syscalls[])(void) = {
+   [SYS_sync]    = sys_sync,
++[SYS_sem_init] = sys_sem_init,             // new
++[SYS_sem_down] = sys_sem_down,             // new
++[SYS_sem_up]   = sys_sem_up,               // new
++[SYS_trace]   = sys_trace,                  // new
+   // clang-format on
+@@ -135,2 +143,14 @@ static uint64 (*syscalls[])(void) = {
+ 
++static char *syscallnames[] = {
++  [SYS_fork] = "fork",   [SYS_exit] = "exit",     [SYS_wait] = "wait",
++  [SYS_pipe] = "pipe",   [SYS_read] = "read",     [SYS_kill] = "kill",
++  [SYS_exec] = "exec",   [SYS_fstat] = "fstat",   [SYS_chdir] = "chdir",
++  [SYS_dup] = "dup",     [SYS_getpid] = "getpid", [SYS_sbrk] = "sbrk",
++  [SYS_pause] = "pause", [SYS_uptime] = "uptime", [SYS_open] = "open",
++  [SYS_write] = "write", [SYS_mknod] = "mknod",   [SYS_unlink] = "unlink",
++  [SYS_link] = "link",   [SYS_mkdir] = "mkdir",   [SYS_close] = "close",
++  [SYS_sync] = "sync",   [SYS_trace] = "trace",
++  [SYS_sem_init] = "sem_init", [SYS_sem_down] = "sem_down", [SYS_sem_up] = "sem_up",
++};
++
+ void
+@@ -146,2 +166,5 @@ syscall(void)
+     p->trapframe->a0 = syscalls[num]();
++    if ((p->trace_mask >> num) & 1)                    // new
++      printk("%d: syscall %s -> %ld\n",                // new
++             p->pid, syscallnames[num], p->trapframe->a0);
+   } else {
+diff --git a/kernel/syscall.h b/kernel/syscall.h
+index 5a4a39f..08f6632 100644
+--- a/kernel/syscall.h
++++ b/kernel/syscall.h
+@@ -23 +23,5 @@
+ #define SYS_sync   22
++#define SYS_trace        23       // new
++#define SYS_sem_init 24              // new
++#define SYS_sem_down 25              // new
++#define SYS_sem_up   26              // new
+diff --git a/user/user.h b/user/user.h
+index 29aad59..f2ba2aa 100644
+--- a/user/user.h
++++ b/user/user.h
+@@ -27,2 +27,6 @@ int uptime(void);
+ int sync(void);
++int sem_init(int, int);          // new: id, start value
++int sem_down(int);               // new: take one, or sleep
++int sem_up(int);                 // new: give one back
++int trace(int);                // new
+ 
+diff --git a/user/usys.pl b/user/usys.pl
+index 4d054e8..e55bb67 100755
+--- a/user/usys.pl
++++ b/user/usys.pl
+@@ -45 +45,5 @@ entry("uptime");
+ entry("sync");
++entry("trace");                # new
++entry("sem_init");               # new
++entry("sem_down");               # new
++entry("sem_up");                 # new
+
+$ git status --short
+ M Makefile
+ M kernel/proc.c
+ M kernel/proc.h
+ A kernel/sem.c
+ M kernel/syscall.c
+ M kernel/syscall.h
+ M kernel/sysproc.c
+ A user/mix.c
+ A user/semtest.c
+ M user/user.h
+ M user/usys.pl
+?? notes.md
+?? user/args.c
+?? user/find.c
+?? user/mystat.c
+?? user/pingpong.c
+?? user/primes.c
+?? user/run.c
+?? user/sleep.c
+?? user/trace.c
