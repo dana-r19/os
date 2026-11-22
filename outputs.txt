@@ -1,0 +1,111 @@
+
+=== PART 1: producer and consumer ===
+
+$ gcc -Wall -pthread -o prodcons prodcons.c && ./prodcons
+put 1    (in buffer: 1)
+            take 1   (in buffer: 0)
+put 2    (in buffer: 1)
+put 3    (in buffer: 2)
+put 4    (in buffer: 3)
+put 5    (in buffer: 4)
+            take 2   (in buffer: 3)
+put 6    (in buffer: 4)
+            take 3   (in buffer: 3)
+put 7    (in buffer: 4)
+            take 4   (in buffer: 3)
+put 8    (in buffer: 4)
+            take 5   (in buffer: 3)
+            take 6   (in buffer: 2)
+            take 7   (in buffer: 1)
+            take 8   (in buffer: 0)
+
+$ diff prodcons.c prodcons_swap.c
+20d19
+<         sem_wait(&empty);               /* wait for a free slot */
+21a21
+>         sem_wait(&empty);               /* wait for a free slot */
+
+$ gcc -Wall -pthread -o prodcons_swap prodcons_swap.c && timeout 5 ./prodcons_swap; echo "exit code: $?"
+put 1    (in buffer: 1)
+put 2    (in buffer: 2)
+put 3    (in buffer: 3)
+put 4    (in buffer: 4)
+exit code: 124
+
+=== PART 2: the condition variable ===
+
+$ gcc -Wall -pthread -o condvar condvar.c && ./condvar
+B: not ready, I sleep
+A: message written
+B: I read "hello"
+
+$ diff condvar.c condvar_if.c
+27c27
+<     while (!ready) {                                    /* while, not if: re-check after waking */
+---
+>     if (!ready) {                                    /* while, not if: re-check after waking */
+
+$ gcc -Wall -pthread -o condvar_if condvar_if.c && ./condvar_if
+B: not ready, I sleep
+A: message written
+B: I read "hello"
+
+=== PART 3: readers and writers ===
+
+$ gcc -Wall -pthread -o readers readers.c && ./readers
+writer 1 writes 10 (alone)
+reader 2 reads 10     (readers inside: 2)
+reader 3 reads 10     (readers inside: 3)
+reader 1 reads 10     (readers inside: 3)
+writer 2 writes 20 (alone)
+
+$ ./readers
+writer 1 writes 10 (alone)
+reader 1 reads 10     (readers inside: 1)
+reader 3 reads 10     (readers inside: 3)
+reader 2 reads 10     (readers inside: 3)
+writer 2 writes 20 (alone)
+
+$ ./readers
+writer 1 writes 10 (alone)
+reader 2 reads 10     (readers inside: 1)
+reader 3 reads 10     (readers inside: 2)
+reader 1 reads 10     (readers inside: 3)
+writer 2 writes 20 (alone)
+
+=== PART 4: a deadlock ===
+
+$ gcc -Wall -pthread -o deadlock_orig deadlock_orig.c && timeout 5 ./deadlock_orig; echo "exit code: $?"
+two: I have B, I want A
+one: I have A, I want B
+exit code: 124
+
+$ diff deadlock_orig.c deadlock.c
+24,25c24,25
+<     pthread_mutex_lock(&B);             /* the fix: lock A first here too */
+<     printf("two: I have B, I want A\n");
+---
+>     pthread_mutex_lock(&A);             /* the fix: the same order as one() */
+>     printf("two: I have A, I want B\n");
+27c27
+<     pthread_mutex_lock(&A);             /* waits for one */
+---
+>     pthread_mutex_lock(&B);
+29d28
+<     pthread_mutex_unlock(&A);
+30a30
+>     pthread_mutex_unlock(&A);
+
+$ gcc -Wall -pthread -o deadlock deadlock.c && timeout 5 ./deadlock; echo "exit code: $?"
+one: I have A, I want B
+one: I have both
+two: I have A, I want B
+two: I have both
+done
+exit code: 0
+
+$ gcc -Wall -pthread -o deadlock_nosleep deadlock_nosleep.c && grep -c sleep deadlock_nosleep.c
+0
+
+$ for i in 1 2 3 4 5 6 7 8 9 10; do timeout 2 ./deadlock_nosleep > /dev/null; echo -n "$? "; done; echo
+0 0 124 124 0 0 124 0 0 124 
