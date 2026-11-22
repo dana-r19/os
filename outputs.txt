@@ -1,0 +1,111 @@
+
+=== PART 1: see the race ===
+
+$ gcc -Wall -pthread -o race race.c && ./race && ./race && ./race
+counter = 2000000 (expected 2000000)
+counter = 2000000 (expected 2000000)
+counter = 2000000 (expected 2000000)
+
+=== PART 2: mutex, then semaphore ===
+
+$ gcc -Wall -pthread -o mutex mutex.c && ./mutex && ./mutex && ./mutex
+counter = 2000000 (expected 2000000)
+counter = 2000000 (expected 2000000)
+counter = 2000000 (expected 2000000)
+
+$ gcc -Wall -pthread -o sem sem.c && ./sem && ./sem && ./sem
+counter = 2000000 (expected 2000000)
+counter = 2000000 (expected 2000000)
+counter = 2000000 (expected 2000000)
+
+$ time ./race
+counter = 2000000 (expected 2000000)
+
+real	0m0.004s
+user	0m0.002s
+sys	0m0.001s
+
+$ time ./mutex
+counter = 2000000 (expected 2000000)
+
+real	0m0.016s
+user	0m0.007s
+sys	0m0.007s
+
+$ time ./sem
+counter = 2000000 (expected 2000000)
+
+real	0m0.017s
+user	0m0.010s
+sys	0m0.003s
+
+$ grep -n sem_init sem2.c
+23:    sem_init(&s, 0, 2);         /* 0 = shared between threads, 1 = start value */
+
+$ gcc -Wall -pthread -o sem2 sem2.c && ./sem2 && ./sem2 && ./sem2 && ./sem2 && ./sem2
+counter = 1990297 (expected 2000000)
+counter = 1999750 (expected 2000000)
+counter = 1992408 (expected 2000000)
+counter = 2000000 (expected 2000000)
+counter = 1995858 (expected 2000000)
+
+=== PART 3: a semaphore as a signal ===
+
+$ gcc -Wall -pthread -o order order.c && ./order
+B: waiting for the message...
+A: message written
+B: I read "hello"
+
+$ grep -n sem_init order1.c
+29:    sem_init(&ready, 0, 1);
+
+$ gcc -Wall -pthread -o order1 order1.c && ./order1
+B: waiting for the message...
+B: I read ""
+A: message written
+
+=== PART 4: the parking lot ===
+
+$ gcc -Wall -pthread -o parking parking.c && ./parking
+car 1 enters (inside: 1)
+car 2 enters (inside: 2)
+car 4 enters (inside: 3)
+car 4 leaves (inside: 2)
+car 5 enters (inside: 3)
+car 1 leaves (inside: 2)
+car 3 enters (inside: 3)
+car 2 leaves (inside: 2)
+car 6 enters (inside: 3)
+car 5 leaves (inside: 2)
+car 6 leaves (inside: 1)
+car 3 leaves (inside: 0)
+
+$ grep -n 'define PLACES' parking1.c
+9:#define PLACES 1
+
+$ gcc -Wall -pthread -o parking1 parking1.c && time ./parking1
+car 2 enters (inside: 1)
+car 2 leaves (inside: 0)
+car 1 enters (inside: 1)
+car 1 leaves (inside: 0)
+car 3 enters (inside: 1)
+car 3 leaves (inside: 0)
+car 4 enters (inside: 1)
+car 4 leaves (inside: 0)
+car 6 enters (inside: 1)
+car 6 leaves (inside: 0)
+car 5 enters (inside: 1)
+car 5 leaves (inside: 0)
+
+real	0m6.917s
+user	0m0.003s
+sys	0m0.001s
+
+=== OPTIONAL: no lock at all ===
+
+$ gcc -Wall -pthread -o atomic atomic.c && time ./atomic
+counter = 2000000 (expected 2000000)
+
+real	0m0.025s
+user	0m0.034s
+sys	0m0.014s
