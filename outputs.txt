@@ -1,0 +1,227 @@
+
+=== PART 1: the calls of a real command ===
+
+$ strace -V | head -1
+strace -- version 6.19
+
+$ strace -f -e trace=openat,read,write,close ls -l
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/etc/ld.so.cache"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/lib/x86_64-linux-gnu/libsystemd.so.0"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0"[0m...[35m[0m, [35m832[0m)[0m [0m=[0m[0m [32m832[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/lib/x86_64-linux-gnu/libselinux.so.1"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0"[0m...[35m[0m, [35m832[0m)[0m [0m=[0m[0m [32m832[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/lib/x86_64-linux-gnu/libgcc_s.so.1"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0"[0m...[35m[0m, [35m832[0m)[0m [0m=[0m[0m [32m832[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/lib/x86_64-linux-gnu/libm.so.6"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0"[0m...[35m[0m, [35m832[0m)[0m [0m=[0m[0m [32m832[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/lib/x86_64-linux-gnu/libc.so.6"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0 \250\2\0\0\0\0\0"[0m...[35m[0m, [35m832[0m)[0m [0m=[0m[0m [32m832[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/lib/x86_64-linux-gnu/libpcre2-8.so.0"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0\0\0\0\0\0\0\0\0"[0m...[35m[0m, [35m832[0m)[0m [0m=[0m[0m [32m832[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/proc/filesystems"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"nodev\tsysfs\nnodev\ttmpfs\nnodev\tpr"[0m...[35m[0m, [35m1024[0m)[0m [0m=[0m[0m [32m369[0m[0m
+[33mread[0m([35m3[0m[0m, [35m""[0m, [35m1024[0m)[0m                       [0m=[0m[0m [32m0[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/proc/self/maps"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"5f2f26d99000-5f2f26e8d000 r--p 0"[0m...[35m[0m, [35m1024[0m)[0m [0m=[0m[0m [32m1024[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"02 655615                     /u"[0m...[35m[0m, [35m1024[0m)[0m [0m=[0m[0m [32m1024[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"m.so.6\n771ab231b000-771ab23bb000"[0m...[35m[0m, [35m1024[0m)[0m [0m=[0m[0m [32m1024[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"ab2464000 r--p 00000000 08:02 68"[0m...[35m[0m, [35m1024[0m)[0m [0m=[0m[0m [32m1024[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"                 /usr/lib/x86_64"[0m...[35m[0m, [35m1024[0m)[0m [0m=[0m[0m [32m1024[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"1ab25fc000 rw-p 0003d000 08:02 6"[0m...[35m[0m, [35m1024[0m)[0m [0m=[0m[0m [32m319[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/coreutils/locales/uucore/en-US.ftl"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"# Common strings shared across a"[0m...[35m[0m, [35m4113[0m)[0m [0m=[0m[0m [32m4113[0m[0m
+[33mread[0m([35m3[0m[0m, [35m""[0m, [35m32[0m)[0m                         [0m=[0m[0m [32m0[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/coreutils/locales/ls/en-US.ftl"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m-1[0m [31mENOENT[0m [31m(No such file or directory)[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"."[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/etc/nsswitch.conf"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mread[0m([35m4[0m[0m, [35m"# /etc/nsswitch.conf\n#\n# Example"[0m...[35m[0m, [35m4096[0m)[0m [0m=[0m[0m [32m594[0m[0m
+[33mread[0m([35m4[0m[0m, [35m""[0m, [35m4096[0m)[0m                       [0m=[0m[0m [32m0[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/etc/passwd"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mread[0m([35m4[0m[0m, [35m"root:x:0:0:root:/root:/bin/bash\n"[0m...[35m[0m, [35m4096[0m)[0m [0m=[0m[0m [32m2766[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/etc/group"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mread[0m([35m4[0m[0m, [35m"root:x:0:\ndaemon:x:1:\nbin:x:2:\ns"[0m...[35m[0m, [35m4096[0m)[0m [0m=[0m[0m [32m1116[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Atlantic"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Etc"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Antarctica"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Pacific"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Australia"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Europe"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Asia"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Arctic"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Indian"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Africa"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/America"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/America/Argentina"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/America/North_Dakota"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/America/Kentucky"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/America/Indiana"[0m, [35m[34mO_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/share/zoneinfo/Etc/UTC"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m4[0m[0m
+[33mread[0m([35m4[0m[0m, [35m"TZif2\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"[0m...[35m[0m, [35m114[0m)[0m [0m=[0m[0m [32m114[0m[0m
+[33mread[0m([35m4[0m[0m, [35m""[0m, [35m32[0m)[0m                         [0m=[0m[0m [32m0[0m[0m
+[33mclose[0m([35m4[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mwrite[0m([35m1[0m, [35m"total 12\n-rw-rw-r-- 1 dana dana "[0m...[35m[0m, [35m114[0mtotal 12
+-rw-rw-r-- 1 dana dana 5476 Nov 22 15:34 outputs.txt
+-rw-rw-r-- 1 dana dana 1070 Nov 22 15:34 syscalls.c
+[0m)[0m [0m=[0m[0m [32m114[0m[0m
++++ exited with 0 +++[0m
+
+$ strace -c -f ls -l > /dev/null
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ------------------
+ 29.81    0.000446         446         1           execve
+ 19.92    0.000298           9        32           mmap
+ 10.70    0.000160           4        34           getdents64
+  9.83    0.000147           4        32         1 openat
+  6.82    0.000102           2        35           close
+  5.08    0.000076           2        30           fstat
+  4.08    0.000061           6         9           mprotect
+  2.81    0.000042           1        22           read
+  1.40    0.000021           5         4         4 connect
+  1.20    0.000018           4         4           socket
+  1.14    0.000017           2         6           brk
+  1.07    0.000016           1         9           statx
+  0.87    0.000013           2         6         4 ioctl
+  0.74    0.000011           2         4           listxattr
+  0.74    0.000011           2         4           newfstatat
+  0.60    0.000009           1         6           lseek
+  0.53    0.000008           4         2           pread64
+  0.40    0.000006           3         2           munmap
+  0.40    0.000006           3         2         2 access
+  0.33    0.000005           0         9           rt_sigaction
+  0.27    0.000004           2         2           readlink
+  0.27    0.000004           4         1           arch_prctl
+  0.27    0.000004           4         1           set_tid_address
+  0.27    0.000004           4         1           set_robust_list
+  0.20    0.000003           3         1           rseq
+  0.13    0.000002           2         1           write
+  0.13    0.000002           0         3           sigaltstack
+  0.00    0.000000           0         1           poll
+  0.00    0.000000           0         3           fcntl
+  0.00    0.000000           0         2         2 statfs
+  0.00    0.000000           0         1           gettid
+  0.00    0.000000           0         1           sched_getaffinity
+  0.00    0.000000           0         2           prlimit64
+  0.00    0.000000           0         1           getrandom
+------ ----------- ----------- --------- --------- ------------------
+100.00    0.001496           5       274        13 total
+
+$ strace -e trace=write ls -l > /dev/null
+[33mwrite[0m([35m1[0m, [35m"total 20\n-rw-rw-r-- 1 dana dana "[0m...[35m[0m, [35m116[0m[0m)[0m [0m=[0m[0m [32m116[0m[0m
++++ exited with 0 +++[0m
+
+=== PART 2: a program that calls the kernel directly ===
+
+$ gcc -Wall -Wextra -o syscalls syscalls.c
+
+$ ./syscalls
+open returned descriptor 3
+write sent 14 bytes
+read got 14 bytes: hello, kernel
+
+$ cat note.txt
+hello, kernel
+
+$ strace -e trace=openat,write,read,close ./syscalls
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/etc/ld.so.cache"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"/usr/lib/x86_64-linux-gnu/libc.so.6"[0m, [35m[34mO_RDONLY|O_CLOEXEC[35m[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"\177ELF\2\1\1\3\0\0\0\0\0\0\0\0\3\0>\0\1\0\0\0 \250\2\0\0\0\0\0"[0m...[35m[0m, [35m832[0m)[0m [0m=[0m[0m [32m832[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"note.txt"[0m, [35m[34mO_WRONLY|O_CREAT|O_TRUNC[35m[0m, [35m0644[0m[0m)[0m [0m=[0m[0m [32m3[0m[0m
+[33mwrite[0m([35m1[0m, [35m"open returned descriptor 3\n"[0m, [35m27[0mopen returned descriptor 3
+[0m)[0m [0m=[0m[0m [32m27[0m[0m
+[33mwrite[0m([35m3[0m, [35m"hello, kernel\n"[0m, [35m14[0m[0m)[0m         [0m=[0m[0m [32m14[0m[0m
+[33mwrite[0m([35m1[0m, [35m"write sent 14 bytes\n"[0m, [35m20[0mwrite sent 14 bytes
+[0m)[0m   [0m=[0m[0m [32m20[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
+[33mopenat[0m([35m[34mAT_FDCWD[35m[0m, [35m"note.txt"[0m, [35m[34mO_RDONLY[35m[0m[0m)[0m  [0m=[0m[0m [32m3[0m[0m
+[33mread[0m([35m3[0m[0m, [35m"hello, kernel\n"[0m, [35m63[0m)[0m          [0m=[0m[0m [32m14[0m[0m
+[33mwrite[0m([35m1[0m, [35m"read got 14 bytes: hello, kernel"[0m...[35m[0m, [35m33[0mread got 14 bytes: hello, kernel
+[0m)[0m [0m=[0m[0m [32m33[0m[0m
+[33mclose[0m([35m3[0m[0m)[0m                                [0m=[0m[0m [32m0[0m[0m
++++ exited with 0 +++[0m
+
+$ strace -e trace=openat,write,read,close ./syscalls 2>&1 | grep -n 'note.txt\|hello'
+6:openat(AT_FDCWD, "note.txt", O_WRONLY|O_CREAT|O_TRUNC, 0644) = 3
+7:write(3, "hello, kernel\n", 14)         = 14
+9:openat(AT_FDCWD, "note.txt", O_RDONLY)  = 3
+10:read(3, "hello, kernel\n", 63)          = 14
+14:read got 14 bytes: hello, kernel
+
+=== PART 3: count one kind of call ===
+
+$ strace -c ./syscalls
+open returned descriptor 3
+write sent 14 bytes
+read got 14 bytes: hello, kernel
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 91.20    0.000311          77         4           close
+  4.11    0.000014           3         4           openat
+  2.35    0.000008           4         2           read
+  2.35    0.000008           2         4           write
+  0.00    0.000000           0         3           fstat
+  0.00    0.000000           0         8           mmap
+  0.00    0.000000           0         3           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         3           brk
+  0.00    0.000000           0         2           pread64
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+  0.00    0.000000           0         1           set_tid_address
+  0.00    0.000000           0         1           set_robust_list
+  0.00    0.000000           0         1           prlimit64
+  0.00    0.000000           0         1           getrandom
+  0.00    0.000000           0         1           rseq
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000341           8        42         1 total
+
+$ strace -e trace=openat ls -l 2>&1 >/dev/null | grep -c '^openat'
+32
+
+$ strace -e trace=write ls -l 2>&1 >/dev/null | grep -c '^write'
+1
+
+$ strace -e trace=read,write,openat,close,mmap ./syscalls 2>&1 >/dev/null | cut -d'(' -f1 | sort | uniq -c | sort -rn
+      8 mmap
+      4 openat
+      4 close
+      2 write
+      2 read
+      1 +++ exited with 0 +++
