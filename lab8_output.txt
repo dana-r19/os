@@ -1,0 +1,109 @@
+=== PART 1 AND 2: the Makefile lines ===
+
+$ grep -n "_run\|_pingpong\|_primes" Makefile
+154:	$U/_run\
+155:	$U/_pingpong\
+156:	$U/_primes\
+
+=== XV6 SESSION 1: run (the child becomes echo) ===
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 1 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+init: starting sh
+$ run
+parent: my pid is 3
+child: my pid is 4
+hello from the child
+parent: child 4 ended with status 0
+$ QEMU: Terminated
+
+=== XV6 SESSION 2: run (the child becomes ls) ===
+
+$ grep -n "args\[\]\|exec(" user/run.c
+16:    char *args[] = { "ls", 0 };
+17:    exec("ls", args);                 // step 2: become echo
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 1 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+init: starting sh
+$ run
+parent: my pid is 3
+child: my pid is 4
+.              1 1 1024
+..             1 1 1024
+README         2 2 2441
+cat            2 3 36760
+echo           2 4 35624
+sleep          2 5 35312
+args           2 6 35304
+find           2 7 42872
+mystat         2 8 36352
+forktest       2 9 18168
+grep           2 10 44216
+init           2 11 36008
+kill           2 12 35544
+ln             2 13 35336
+ls             2 14 42912
+mkdir          2 15 35600
+rm             2 16 35584
+sh             2 17 58312
+stressfs       2 18 36448
+usertests      2 19 213544
+grind          2 20 51856
+wc             2 21 37760
+zombie         2 22 34880
+run            2 23 35920
+pingpong       2 24 35904
+primes         2 25 36560
+logstress      2 26 37592
+forphan        2 27 36384
+dorphan        2 28 35832
+sync           2 29 34976
+console        3 30 0
+parent: child 4 ended with status 0
+$ QEMU: Terminated
+
+=== XV6 SESSION 3: run (a program that does not exist) ===
+
+$ grep -n "args\[\]\|exec(" user/run.c
+16:    char *args[] = { "echo", "hello", "from", "the", "child", 0 };
+17:    exec("nosuchprog", args);                 // step 2: become echo
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 1 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+init: starting sh
+$ run
+parent: my pid is 3
+child: my pid is 4
+exec failed
+parent: child 4 ended with status 1
+$ QEMU: Terminated
+
+=== XV6 SESSION 4: pingpong and primes ===
+qemu-system-riscv64 -machine virt -bios none -kernel kernel/kernel -m 128M -smp 1 -nographic -global virtio-mmio.force-legacy=false -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+xv6 kernel is booting
+
+init: starting sh
+$ pingpong
+4: received ping
+3: received pong
+$ primes
+prime 2
+prime 3
+prime 5
+prime 7
+prime 11
+prime 13
+prime 17
+prime 19
+prime 23
+prime 29
+prime 31
+$ echo primes finished
+primes finished
+$ QEMU: Terminated
+
