@@ -1,0 +1,111 @@
+
+=== BUILD ===
+build ok
+
+$ grep -n "uthread" Makefile
+155:	$U/_uthread\
+219:$U/_uthread: $U/uthread.o $U/uthread_switch.o $(ULIB) $U/user.ld
+220:	$(LD) $(LDFLAGS) -T $U/user.ld -o $U/_uthread $U/uthread.o $U/uthread_switch.o $(ULIB)
+221:	$(OBJDUMP) -S $U/_uthread > $U/uthread.asm
+
+$ sed -n "/<thread_switch>:/,/ret/p" user/uthread.asm
+00000000000003b2 <thread_switch>:
+ 3b2:	00153023          	sd	ra,0(a0)
+ 3b6:	00253423          	sd	sp,8(a0)
+ 3ba:	e900                	sd	s0,16(a0)
+ 3bc:	ed04                	sd	s1,24(a0)
+ 3be:	03253023          	sd	s2,32(a0)
+ 3c2:	03353423          	sd	s3,40(a0)
+ 3c6:	03453823          	sd	s4,48(a0)
+ 3ca:	03553c23          	sd	s5,56(a0)
+ 3ce:	05653023          	sd	s6,64(a0)
+ 3d2:	05753423          	sd	s7,72(a0)
+ 3d6:	05853823          	sd	s8,80(a0)
+ 3da:	05953c23          	sd	s9,88(a0)
+ 3de:	07a53023          	sd	s10,96(a0)
+ 3e2:	07b53423          	sd	s11,104(a0)
+ 3e6:	0005b083          	ld	ra,0(a1)
+ 3ea:	0085b103          	ld	sp,8(a1)
+ 3ee:	6980                	ld	s0,16(a1)
+ 3f0:	6d84                	ld	s1,24(a1)
+ 3f2:	0205b903          	ld	s2,32(a1)
+ 3f6:	0285b983          	ld	s3,40(a1)
+ 3fa:	0305ba03          	ld	s4,48(a1)
+ 3fe:	0385ba83          	ld	s5,56(a1)
+ 402:	0405bb03          	ld	s6,64(a1)
+ 406:	0485bb83          	ld	s7,72(a1)
+ 40a:	0505bc03          	ld	s8,80(a1)
+ 40e:	0585bc83          	ld	s9,88(a1)
+ 412:	0605bd03          	ld	s10,96(a1)
+ 416:	0685bd83          	ld	s11,104(a1)
+ 41a:	8082                	ret
+
+=== RUN: uthread in xv6 ===
+--- first lines of the run ---
+$ uthread
+thread_a started
+thread_b started
+thread_c started
+thread_c 0
+thread_a 0
+thread_b 0
+thread_c 1
+thread_a 1
+thread_b 1
+thread_c 2
+thread_a 2
+thread_b 2
+thread_c 3
+thread_a 3
+thread_b 3
+thread_c 4
+thread_a 4
+thread_b 4
+thread_c 5
+thread_a 5
+thread_b 5
+thread_c 6
+thread_a 6
+thread_b 6
+thread_c 7
+thread_a 7
+thread_b 7
+thread_c 8
+thread_a 8
+--- last lines of the run ---
+thread_a 97
+thread_b 97
+thread_c 98
+thread_a 98
+thread_b 98
+thread_c 99
+thread_a 99
+thread_b 99
+thread_c: exit after 100
+thread_a: exit after 100
+thread_b: exit after 100
+thread_schedule: no runnable threads
+$ QEMU: Terminated
+
+--- counts ---
+lines 'thread_a N': 100
+lines 'thread_b N': 100
+lines 'thread_c N': 100
+total lines in the full run: 314
+--- order check: first 3 numbers of each round, rounds 0 and 99 ---
+thread_c 0
+thread_a 0
+thread_b 0
+thread_c 1
+thread_a 1
+thread_b 1
+thread_c 98
+thread_a 98
+thread_b 98
+thread_c 99
+thread_a 99
+thread_b 99
+
+$ git status --short | grep -i uthread
+?? user/uthread.c
+?? user/uthread_switch.S
