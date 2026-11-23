@@ -1,0 +1,7 @@
+Lab 18 - notes (Observe)
+
+What exactly does thread_switch save and load?
+It saves into the context of the old thread (pointed to by a0) and loads from the context of the new thread (a1) the callee-saved registers: ra, sp and s0..s11 (14 registers, 8 bytes each, offsets 0..104). The caller-saved registers do not need saving: thread_switch is called like a normal function, so the compiler already saves what it needs around the call. The program counter is not saved by itself; ra takes its place.
+
+Why is ra the register that makes execution continue in the other thread?
+ret jumps to the address in ra. thread_switch loads ra from the new thread's context just before ret, so ret returns into the place where the new thread was switched out (after its own call to thread_switch), not to the caller. sp is loaded too, so it continues on its own stack. For a new thread, thread_create sets ra = its function and sp = top of its stack, so the first switch "returns" into the function.
