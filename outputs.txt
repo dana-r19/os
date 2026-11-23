@@ -1,0 +1,71 @@
+
+$ nproc
+2
+
+$ gcc -Wall -Wextra -pthread -o fire fire.c
+
+$ for i in 1 2 3 4 5; do ./fire; echo; done
+thread 1 sees counter = 0
+thread 2 sees counter = 1000000
+expected: 2000000
+counter: 2000000    (lost updates: the race)
+
+thread 1 sees counter = 0
+thread 2 sees counter = 980870
+expected: 2000000
+counter: 1981663    (lost updates: the race)
+
+thread 1 sees counter = 0
+thread 2 sees counter = 0
+expected: 2000000
+counter: 1425635    (lost updates: the race)
+
+thread 1 sees counter = 0
+thread 2 sees counter = 1000000
+expected: 2000000
+counter: 2000000    (lost updates: the race)
+
+thread 1 sees counter = 0
+thread 2 sees counter = 0
+expected: 2000000
+counter: 2000000    (lost updates: the race)
+
+
+$ gcc -Wall -Wextra -pthread -o fire4 fire4.c
+
+$ for i in 1 2 3 4 5; do ./fire4; echo; done
+thread 2 sees counter = 0
+thread 3 sees counter = 1000000
+thread 4 sees counter = 2000000
+thread 1 sees counter = 3000000
+expected: 4000000
+counter: 4000000    (lost updates: the race)
+
+thread 2 sees counter = 0
+thread 1 sees counter = 0
+thread 3 sees counter = 1162748
+thread 4 sees counter = 2140309
+expected: 4000000
+counter: 3140309    (lost updates: the race)
+
+thread 1 sees counter = 0
+thread 2 sees counter = 1000000
+thread 3 sees counter = 2000000
+thread 4 sees counter = 3000000
+expected: 4000000
+counter: 4000000    (lost updates: the race)
+
+thread 1 sees counter = 0
+thread 3 sees counter = 0
+thread 2 sees counter = 793950
+thread 4 sees counter = 1850403
+expected: 4000000
+counter: 3341630    (lost updates: the race)
+
+thread 1 sees counter = 0
+thread 3 sees counter = 106706
+thread 4 sees counter = 1116028
+thread 2 sees counter = 1492322
+expected: 4000000
+counter: 2479735    (lost updates: the race)
+
